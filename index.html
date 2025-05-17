@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Configure Looper</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #topSection {
+      display: flex;
+      flex: 2;
+    }
+
+    #leftPanel, #rightPanel {
+      padding: 20px;
+      box-sizing: border-box;
+      height: 100%;
+    }
+
+    #leftPanel {
+      width: 35%;
+      background-color: #f3fdf5;
+      border-right: 2px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #rightPanel {
+      width: 65%;
+      background-color: #ffffff;
+    }
+
+    .inputBox {
+      margin-bottom: 10px;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .addLayerBtn {
+      align-self: center;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .rung {
+      width: 80%;
+      padding: 10px;
+      background-color: #e1f5e5;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      margin: 5px auto;
+      text-align: center;
+      cursor: grab;
+    }
+
+    .ladder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin-top: 20px;
+      min-height: 300px;
+    }
+
+    .drag-over {
+      border: 2px dashed #555;
+      background-color: #eef;
+    }
+
+    #bottomSection {
+      flex: 1;
+      background-color: #f8f8f8;
+      border-top: 2px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="topSection">
+    <div id="leftPanel">
+      <h2>Configure Looper</h2>
+      <input id="layerName" class="inputBox" placeholder="Layer Name" />
+      <textarea id="layerInstructions" class="inputBox" rows="10" placeholder="Instructions..."></textarea>
+      <button class="addLayerBtn" onclick="addLayer()">Add Layer</button>
+    </div>
+
+    <div id="rightPanel">
+      <h2 style="text-align:center;">Framework</h2>
+      <div class="ladder" id="ladder"></div>
+    </div>
+  </div>
+
+  <div id="bottomSection">
+    Preview Area — Not functional in this demo.
+  </div>
+
+  <script>
+    const ladder = document.getElementById('ladder');
+    let steps = ['User Input', 'Task Execution', 'Output'];
+    let draggedIndex = null;
+
+    function renderLadder() {
+      ladder.innerHTML = '';
+      steps.forEach((step, index) => {
+        const rung = document.createElement('div');
+        rung.className = 'rung';
+        rung.draggable = true;
+        rung.dataset.index = index;
+        rung.textContent = step;
+
+        rung.addEventListener('dragstart', (e) => {
+          draggedIndex = parseInt(e.target.dataset.index);
+        });
+
+        rung.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          rung.classList.add('drag-over');
+        });
+
+        rung.addEventListener('dragleave', () => {
+          rung.classList.remove('drag-over');
+        });
+
+        rung.addEventListener('drop', (e) => {
+          e.preventDefault();
+          rung.classList.remove('drag-over');
+          const dropIndex = parseInt(e.target.dataset.index);
+          if (dropIndex === draggedIndex) return;
+          const moved = steps.splice(draggedIndex, 1)[0];
+          steps.splice(dropIndex, 0, moved);
+          renderLadder();
+        });
+
+        ladder.appendChild(rung);
+      });
+    }
+
+    function addLayer() {
+      const name = document.getElementById('layerName').value.trim();
+      if (!name) return;
+      steps.splice(steps.length - 1, 0, name); // insert before 'Output'
+      renderLadder();
+      document.getElementById('layerName').value = '';
+      document.getElementById('layerInstructions').value = '';
+    }
+
+    renderLadder();
+  </script>
+</body>
+</html>
